@@ -23,27 +23,65 @@ connection.connect(function (err) {
     // run the start function after the connection is made to prompt the user
     start();
 });
+var showTableOnly = function (orderCost) {
+    connection.query(
+        "SELECT * from products",
+        function (err, res) {
+            if (err) throw err;
+            console.table(res);
+            console.log("Your order total is: " + orderCost);
+            connection.end();
+        })
+ };
 
 function start() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
-        // Log all results of the SELECT statement
+        // Log all res of the SELECT statement
         console.table(res);
-        inquirer
+             inquirer
             .prompt([{
-                name: "itemID",
+                name: "id",
                 type: "input",
-                message: "What is the id of the item you wish to buy?",
+                message: "What is the id of the item you wish to buy?"
             },
             {
-                name: "itemQuanity",
+                name: "units",
                 type: "input",
-                message: "How much of the item do you wish to buy?",
+                message: "How much of the item do you wish to buy?"
             }
 
             ])
             .then(function (answer) {
-console.log(answer);
-            });
-    });
+                
+                var productID = answer.id;
+                for (var i = 0; i < res.length; i++) {
+                    if (res[i].id == productID) {
+                        if (res[i].stock_quantity >= answer.units) {
+                            var orderCost = answer.units * res[i].price;
+                            var query = connection.query(
+                                "UPDATE products SET ? WHERE ?",
+                                [
+                                    {
+                                        stock_quantity: res[i].stock_quantity - answer.units
+                                    },
+                                    {
+                                        id: productID
+                                    }
+                                ],
+                                function (err, res) {
+                                    console.log(res.affectedRows + " products updated!\n");
+                                    showTableOnly(orderCost);
+                                }
+                            );
+                        } else {
+                            console.log("insufficient quantity");
+                            start();
+                        }
+                    }
+                }
+            }
+            );
+    }
+);
 }
