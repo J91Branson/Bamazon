@@ -23,16 +23,8 @@ connection.connect(function (err) {
     // run the start function after the connection is made to prompt the user
     start();
 });
-var showTableOnly = function (orderCost) {
-    connection.query(
-        "SELECT * from products",
-        function (err, res) {
-            if (err) throw err;
-            console.table(res);
-            console.log("Your order total is: " + orderCost);
-            connection.end();
-        })
- };
+
+
 
 function start() {
     connection.query("SELECT * FROM products", function (err, res) {
@@ -52,36 +44,31 @@ function start() {
             }
 
             ])
-            .then(function (answer) {
-                
-                var productID = answer.id;
-                for (var i = 0; i < res.length; i++) {
-                    if (res[i].id == productID) {
-                        if (res[i].stock_quantity >= answer.units) {
-                            var orderCost = answer.units * res[i].price;
-                            var query = connection.query(
-                                "UPDATE products SET ? WHERE ?",
-                                [
-                                    {
-                                        stock_quantity: res[i].stock_quantity - answer.units
-                                    },
-                                    {
-                                        id: productID
-                                    }
-                                ],
-                                function (err, res) {
-                                    console.log(res.affectedRows + " products updated!\n");
-                                    showTableOnly(orderCost);
-                                }
-                            );
-                        } else {
-                            console.log("insufficient quantity");
-                            start();
-                        }
-                    }
+            .then(function(answer) {
+                // get the information of the chosen item
+                 for (var i = 0; i < res.length; i++) {
+                 if (res[i].id == answer.id) {
+                     if(res[i].stock_quantity >= answer.units) {
+                        console.log("Your total cost is " + answer.units * res[i].price);
+                        connection.query(
+                            "UPDATE products SET ? WHERE ?",
+                            [
+                              {
+                                stock_quantity: res[i].stock_quantity - answer.units
+                              },
+                              {
+                                  id: answer.id
+                              }                              
+                            ],
+                            function(error) {
+                              if (error) throw err;
+                              start();
+                            }
+                          );
+                     } else{console.log("not enough quantity available, please select another amount");
+                     start();                    }
+                  }
                 }
-            }
-            );
-    }
-);
-}
+            })
+            })
+        };                
