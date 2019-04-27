@@ -8,4 +8,4 @@ After you input an ID number & hit enter, you will be asked how many of that ite
 
 Once you submit a number, & hit enter, that request is sent to the server, those items are deducted from inventory, & the table will redisplay, with updated inventory, in terminal with the order total beneath the updated table.
 
-See video of app in action: https://drive.google.com/file/d/1GDaBAVOI1iWXZOcy27tfGomZYezgzKwc/view?usp=sharing
+See video of app in action: https://drive.google.com/file/d/1gYAc7AVvDb9BDV50xq3CNLloXWguZyOJ/view
